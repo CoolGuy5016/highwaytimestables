@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Highway Times Tables</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#10141a;color:white;font-family:Arial,sans-serif;overflow:hidden;user-select:none}
+#game{position:relative;width:100vw;height:100vh;background:#76b852;overflow:hidden}
+#road{position:absolute;left:50%;transform:translateX(-50%);width:min(720px,92vw);height:100%;background:#3b3f45;border-left:12px solid #eee;border-right:12px solid #eee;overflow:hidden}
+.lane{position:absolute;top:0;width:2px;height:100%;background:repeating-linear-gradient(to bottom,#fff 0 70px,transparent 70px 135px);opacity:.75}
+.lane1{left:33.33%}.lane2{left:66.66%}
+#hud{position:absolute;z-index:10;top:15px;left:50%;transform:translateX(-50%);width:min(700px,90vw);display:flex;justify-content:space-between;gap:10px;pointer-events:none}
+.box{background:#111c;color:#fff;border-radius:12px;padding:10px 16px;font-weight:bold;font-size:18px;box-shadow:0 3px 10px #0006}
+#question{position:absolute;z-index:20;top:75px;left:50%;transform:translateX(-50%);font-size:34px;font-weight:900;background:#fff;color:#111;padding:12px 28px;border-radius:15px;box-shadow:0 5px 15px #0005}
+#player{position:absolute;z-index:8;bottom:45px;width:55px;height:95px;border-radius:13px;background:#e63946;left:50%;transform:translateX(-50%);box-shadow:0 5px 10px #0008}
+#player:before,#player:after{content:"";position:absolute;background:#111;width:10px;height:25px;bottom:8px;border-radius:5px}
+#player:before{left:-5px}#player:after{right:-5px}
+.window{position:absolute;left:9px;right:9px;top:12px;height:28px;background:#80c7df;border-radius:8px}
+.answer{position:absolute;z-index:7;width:105px;height:70px;background:#ffca3a;border:5px solid #fff;border-radius:14px;color:#111;font-size:25px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 5px 10px #0007}
+.traffic{position:absolute;z-index:6;width:48px;height:82px;border-radius:11px;background:#277da1;box-shadow:0 5px 10px #0008}
+.traffic:before{content:"";position:absolute;left:7px;right:7px;top:10px;height:24px;background:#9bd5e8;border-radius:6px}
+#overlay{position:absolute;z-index:50;inset:0;background:#000b;display:flex;align-items:center;justify-content:center}
+.panel{width:min(500px,90vw);background:#17202a;border-radius:22px;padding:30px;text-align:center;box-shadow:0 10px 40px #000}
+h1{margin:0 0 10px;font-size:42px}p{color:#ccd6dd;font-size:17px;line-height:1.5}
+button{border:0;border-radius:12px;padding:13px 20px;margin:6px;background:#38b000;color:white;font-size:17px;font-weight:bold;cursor:pointer}
+button:hover{filter:brightness(1.12)}
+select{padding:12px;border-radius:10px;font-size:16px;margin:8px}
+#mobile{position:absolute;z-index:30;bottom:15px;left:50%;transform:translateX(-50%);display:flex;gap:15px}
+#mobile button{width:70px;height:55px;font-size:25px;background:#111c}
+@media(min-width:800px){#mobile{display:none}}
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="road"><div class="lane lane1"></div><div class="lane lane2"></div></div>
+  <div id="hud">
+    <div class="box">⭐ Score: <span id="score">0</span></div>
+    <div class="box">❤️ Lives: <span id="lives">3</span></div>
+    <div class="box">🏆 Best: <span id="best">0</span></div>
+  </div>
+  <div id="question">Get ready!</div>
+  <div id="player"><div class="window"></div></div>
+  <div id="mobile"><button onclick="move(-1)">◀</button><button onclick="move(1)">▶</button></div>
+  <div id="overlay">
+    <div class="panel">
+      <h1>🏎️ Highway Times Tables</h1>
+      <p>Drive through the correct answer! Avoid the wrong answers and traffic.</p>
+      <label>Times table:</label>
+      <select id="table">
+        <option value="0">Mixed</option>
+        <option>2</option><option>3</option><option>4</option><option>5</option>
+        <option>6</option><option>7</option><option>8</option><option>9</option>
+        <option>10</option><option>11</option><option>12</option>
+      </select>
+      <br>
+      <button onclick="startGame()">🚦 Start Driving!</button>
+      <p>Controls: <b>← →</b> or <b>A D</b></p>
+    </div>
+  </div>
+</div>
+
+<script>
+const road=document.getElementById("road"), player=document.getElementById("player");
+const question=document.getElementById("question"), overlay=document.getElementById("overlay");
+const scoreEl=document.getElementById("score"), livesEl=document.getElementById("lives"), bestEl=document.getElementById("best");
+let lane=1, score=0, lives=3, running=false, answers=[], traffic=[], speed=3, last=0, spawnTimer=0;
+let best=Number(localStorage.getItem("highwayBest")||0); bestEl.textContent=best;
+
+function laneX(n,w=0){
+  return (road.clientWidth*(n+0.5)/3)-w/2;
+}
+function move(dir){
+  if(!running)return;
+  lane=Math.max(0,Math.min(2,lane+dir));
+  player.style.left=laneX(lane,player.offsetWidth)+"px";
+}
+document.addEventListener("keydown",e=>{
+  if(e.key==="ArrowLeft"||e.key.toLowerCase()==="a")move(-1);
+  if(e.key==="ArrowRight"||e.key.toLowerCase()==="d")move(1);
+});
+
+function newQuestion(){
+  answers.forEach(a=>a.el.remove()); answers=[];
+  const t=Number(document.getElementById("table").value);
+  const a=t||Math.floor(Math.random()*11)+2;
+  const b=Math.floor(Math.random()*12)+1;
+  const correct=a*b;
+  question.textContent=`${a} × ${b} = ?`;
+  let nums=[correct];
+  while(nums.length<4){
+    let n=Math.max(2,correct+Math.floor(Math.random()*19)-9);
+    if(!nums.includes(n))nums.push(n);
+  }
+  nums.sort(()=>Math.random()-.5);
+  nums.forEach((num,i)=>{
+    const el=document.createElement("div"); el.className="answer"; el.textContent=num;
+    el.dataset.correct=num===correct;
+    el.dataset.lane=i%3;
+    el.style.left=laneX(i%3,105)+"px";
+    el.style.top=(-90-(i>2?90:0))+"px";
+    road.appendChild(el);
+    answers.push({el,lane:i%3,correct:num===correct,y:parseFloat(el.style.top)});
+  });
+}
+
+function spawnTraffic(){
+  const el=document.createElement("div"); el.className="traffic";
+  const l=Math.floor(Math.random()*3); el.style.left=laneX(l,48)+"px"; el.style.top="-100px";
+  road.appendChild(el); traffic.push({el,lane:l,y:-100});
+}
+
+function hit(a){
+  if(a.correct){
+    score+=10; speed=Math.min(8,3+score/100);
+    scoreEl.textContent=score;
+    newQuestion();
+  }else{
+    loseLife();
+  }
+}
+function loseLife(){
+  lives--; livesEl.textContent=lives;
+  if(lives<=0)endGame();
+  else { question.textContent="❌ Wrong! Try the next one!"; setTimeout(newQuestion,650); }
+}
+
+function endGame(){
+  running=false;
+  if(score>best){best=score;localStorage.setItem("highwayBest",best);bestEl.textContent=best}
+  overlay.innerHTML=`<div class="panel"><h1>💥 Game Over!</h1><p>You scored <b>${score}</b> points.</p><p>🏆 Best score: <b>${best}</b></p><button onclick="location.reload()">🔄 Play Again</button></div>`;
+  overlay.style.display="flex";
+}
+
+function startGame(){
+  score=0;lives=3;lane=1;speed=3;traffic=[];answers=[];
+  scoreEl.textContent=0;livesEl.textContent=3;
+  player.style.left=laneX(lane,player.offsetWidth)+"px";
+  document.querySelectorAll(".answer,.traffic").forEach(e=>e.remove());
+  overlay.style.display="none";running=true;last=performance.now();spawnTimer=0;
+  newQuestion();requestAnimationFrame(loop);
+}
+
+function loop(now){
+  if(!running)return;
+  const dt=Math.min(32,now-last); last=now;
+  const dy=speed*dt/16;
+  answers.forEach(a=>{
+    a.y+=dy;a.el.style.top=a.y+"px";
+    if(a.y>road.clientHeight+100){a.el.remove();a.dead=true}
+    if(!a.dead && a.y+70>player.offsetTop && a.y<player.offsetTop+player.offsetHeight && a.lane===lane){
+      a.dead=true;a.el.remove();hit(a);
+    }
+  });
+  answers=answers.filter(a=>!a.dead);
+  spawnTimer+=dt;
+  if(spawnTimer>1100){spawnTimer=0;spawnTraffic()}
+  traffic.forEach(t=>{
+    t.y+=dy*1.15;t.el.style.top=t.y+"px";
+    if(t.y>road.clientHeight+100){t.el.remove();t.dead=true}
+    if(!t.dead && t.y+82>player.offsetTop && t.y<player.offsetTop+player.offsetHeight && t.lane===lane){
+      t.dead=true;t.el.remove();loseLife();
+    }
+  });
+  traffic=traffic.filter(t=>!t.dead);
+  requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>
