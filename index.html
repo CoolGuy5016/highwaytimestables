@@ -84,9 +84,123 @@
     background: #ffaa00;
     box-shadow: 0 4px 8px rgba(255, 170, 0, 0.3);
   }
+
+  #adminBtn {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
+    background: #8b5cf6;
+    color: #fff;
+    border: none;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 7px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
+  }
+
+  #adminBtn:active { transform: scale(0.96); }
+
+  #adminModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    background: rgba(0,0,0,0.72);
+    align-items: center;
+    justify-content: center;
+  }
+
+  #adminModal.show { display: flex; }
+
+  .admin-box {
+    width: min(340px, 90vw);
+    background: #181824;
+    border: 2px solid #8b5cf6;
+    border-radius: 12px;
+    padding: 22px;
+    text-align: center;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.35);
+  }
+
+  .admin-box h2 {
+    margin: 0 0 12px;
+    color: #b794ff;
+    font-size: 22px;
+  }
+
+  #adminCode {
+    width: 100%;
+    padding: 11px;
+    margin: 8px 0 12px;
+    border: 1px solid #555;
+    border-radius: 7px;
+    background: #0d0e15;
+    color: #fff;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+  }
+
+  #adminMessage {
+    min-height: 20px;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .admin-actions button {
+    border: none;
+    border-radius: 7px;
+    padding: 9px 14px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  #adminLogin { background: #8b5cf6; color: #fff; }
+  #adminClose { background: #444; color: #fff; }
+
+  #adminStatus {
+    position: fixed;
+    top: 50px;
+    right: 12px;
+    z-index: 19;
+    display: none;
+    background: #00c878;
+    color: #001b10;
+    padding: 7px 11px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
 </style>
 </head>
 <body>
+
+  <button id="adminBtn">⚙️ ADMIN</button>
+  <div id="adminStatus">🛡️ ADMIN MODE</div>
+
+  <div id="adminModal">
+    <div class="admin-box">
+      <h2>🛡️ Admin Mode</h2>
+      <div>Enter the admin code:</div>
+      <input id="adminCode" type="password" inputmode="numeric" maxlength="20" placeholder="Admin code">
+      <div class="admin-actions">
+        <button id="adminLogin">LOGIN</button>
+        <button id="adminClose">CLOSE</button>
+      </div>
+      <div id="adminMessage"></div>
+    </div>
+  </div>
+
 
   <h1>🏎️ HIGHWAY TIMES TABLES</h1>
 
@@ -96,12 +210,12 @@
 
   <div class="mobile-controls">
     <div class="btn-row">
-      <button class="btn btn-speed" id="upBtn">▲ ACCEL</button>
+      <button class="btn btn-speed" id="upBtn">▲</button>
     </div>
     <div class="btn-row">
-      <button class="btn" id="leftBtn">◀ LEFT</button>
-      <button class="btn btn-speed" id="downBtn">▼ BRAKE</button>
-      <button class="btn" id="rightBtn">RIGHT ▶</button>
+      <button class="btn" id="leftBtn">◀</button>
+      <button class="btn btn-speed" id="downBtn">▼</button>
+      <button class="btn" id="rightBtn">▶</button>
     </div>
   </div>
 
@@ -132,6 +246,9 @@ let score = 0;
 let lives = 3;
 let roadOffset = 0;
 let gameState = 'START'; // 'START', 'PLAYING', 'GAMEOVER'
+let adminMode = false;
+let questionCooldown = 0;
+const QUESTION_DELAY_FRAMES = 120; // ~2 seconds at 60 FPS
 
 // Inputs
 let keys = { up: false, down: false };
@@ -349,16 +466,22 @@ function update() {
         playSound('correct');
         createParticles(LANES[currentLane], optionsY, '#00ff88');
       } else {
-        lives--;
+        if (!adminMode) if (!adminMode) lives--;
         playSound('wrong');
         createParticles(LANES[currentLane], optionsY, '#ff3366');
-        if (lives <= 0) gameState = 'GAMEOVER';
+        if (lives <= 0 && !adminMode) gameState = 'GAMEOVER';
       }
     }
 
-    // Spawn new question when passed
-    if (optionsY > canvas.height + 60) {
-      generateQuestion();
+    // Spawn the next question after a short pause, giving the player more time
+    // between questions instead of immediately starting another wave.
+    if (optionsY > canvas.height + 60 && questionCooldown === 0) {
+      questionCooldown = QUESTION_DELAY_FRAMES;
+    }
+
+    if (questionCooldown > 0) {
+      questionCooldown--;
+      if (questionCooldown === 0) generateQuestion();
     }
 
     // 2. Traffic Spawning & Movement
@@ -378,11 +501,11 @@ function update() {
         Math.abs(traffic.x - carX) < 30 &&
         Math.abs(traffic.y - carY) < 50
       ) {
-        lives--;
+        if (!adminMode) if (!adminMode) lives--;
         playSound('crash');
         createParticles(traffic.x, traffic.y, '#ffaa00');
         trafficCars.splice(i, 1); // Remove crashed car
-        if (lives <= 0) gameState = 'GAMEOVER';
+        if (lives <= 0 && !adminMode) gameState = 'GAMEOVER';
         continue;
       }
 
@@ -540,8 +663,8 @@ function draw() {
 
     // Lives
     ctx.textAlign = 'right';
-    ctx.fillStyle = '#ff2a6d';
-    ctx.fillText(`LIVES: ${"❤️".repeat(lives)}`, canvas.width - 15, 25);
+    ctx.fillStyle = adminMode ? '#00ff88' : '#ff2a6d';
+    ctx.fillText(adminMode ? 'LIVES: ♾️ UNLIMITED' : `LIVES: ${"❤️".repeat(lives)}`, canvas.width - 15, 25);
   }
 
   // 8. Overlays
@@ -585,6 +708,64 @@ function draw() {
 // -------------------------------------------------------------
 // Main Loop
 // -------------------------------------------------------------
+
+// -------------------------------------------------------------
+// ADMIN MODE
+// -------------------------------------------------------------
+const ADMIN_CODE = "2468";
+
+const adminBtn = document.getElementById("adminBtn");
+const adminModal = document.getElementById("adminModal");
+const adminCodeInput = document.getElementById("adminCode");
+const adminLogin = document.getElementById("adminLogin");
+const adminClose = document.getElementById("adminClose");
+const adminMessage = document.getElementById("adminMessage");
+const adminStatus = document.getElementById("adminStatus");
+
+adminBtn.addEventListener("click", function () {
+  adminModal.classList.add("show");
+  adminCodeInput.value = "";
+  adminMessage.textContent = "";
+  adminCodeInput.focus();
+});
+
+adminClose.addEventListener("click", function () {
+  adminModal.classList.remove("show");
+});
+
+adminLogin.addEventListener("click", function () {
+  if (adminCodeInput.value === ADMIN_CODE) {
+    adminMode = true;
+    lives = 999999;
+
+    adminStatus.style.display = "block";
+    adminMessage.textContent = "✅ Admin mode enabled! Unlimited lives.";
+    adminMessage.style.color = "#00ff88";
+
+    setTimeout(function () {
+      adminModal.classList.remove("show");
+    }, 700);
+  } else {
+    adminMessage.textContent = "❌ Incorrect admin code.";
+    adminMessage.style.color = "#ff3366";
+  }
+});
+
+adminCodeInput.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    adminLogin.click();
+  }
+  if (e.key === "Escape") {
+    adminModal.classList.remove("show");
+  }
+});
+
+adminModal.addEventListener("click", function (e) {
+  if (e.target === adminModal) {
+    adminModal.classList.remove("show");
+  }
+});
+
 function gameLoop() {
   update();
   draw();
