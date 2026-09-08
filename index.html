@@ -675,17 +675,17 @@ function draw() {
     ctx.fillStyle = '#00e5ff';
     ctx.font = 'bold 28px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText("4-LANE SPEED RACE", canvas.width / 2, 230);
+    ctx.fillText("Are you ready?", canvas.width / 2, 230);
 
     ctx.fillStyle = '#aaa';
     ctx.font = '15px Arial';
     ctx.fillText("• Steer into correct math answers", canvas.width / 2, 270);
-    ctx.fillText("• Avoid traffic cars on the highway!", canvas.width / 2, 295);
-    ctx.fillText("• Use UP/DOWN arrows to control speed", canvas.width / 2, 320);
+    ctx.fillText("• Avoid crashing into cars", canvas.width / 2, 295);
+    ctx.fillText("• Try to get a high score!", canvas.width / 2, 320);
 
     ctx.fillStyle = '#ffcc00';
     ctx.font = 'bold 18px Arial';
-    ctx.fillText("Press SPACE or TAP to Start", canvas.width / 2, 390);
+    ctx.fillText("Space/Click to Start", canvas.width / 2, 390);
   } else if (gameState === 'GAMEOVER') {
     ctx.fillStyle = 'rgba(13, 14, 21, 0.92)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
