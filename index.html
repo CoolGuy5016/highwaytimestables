@@ -2,777 +2,358 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Highway TimesTables</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    padding: 0;
-    background-color: #0d0e15;
-    color: #ffffff;
-    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    overflow: hidden;
-  }
-
-  h1 {
-    margin: 5px 0 10px 0;
-    font-size: 26px;
-    color: #00e5ff;
-    text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
-    letter-spacing: 2px;
-  }
-
-  #game-container {
-    position: relative;
-    border: 4px solid #00e5ff;
-    border-radius: 12px;
-    box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
-    overflow: hidden;
-  }
-
-  canvas {
-    display: block;
-    background: #181824;
-  }
-
-  .controls-hint {
-    margin-top: 10px;
-    font-size: 13px;
-    color: #a0a3b5;
-    text-align: center;
-    line-height: 1.4;
-  }
-
-  .mobile-controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .btn-row {
-    display: flex;
-    gap: 12px;
-  }
-
-  .btn {
-    background: #00e5ff;
-    border: none;
-    color: #000;
-    padding: 8px 20px;
-    font-size: 15px;
-    font-weight: bold;
-    border-radius: 6px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 229, 255, 0.3);
-    user-select: none;
-  }
-
-  .btn:active {
-    transform: scale(0.95);
-    background: #00b3cc;
-  }
-
-  .btn-speed {
-    background: #ffaa00;
-    box-shadow: 0 4px 8px rgba(255, 170, 0, 0.3);
-  }
-
-  #adminBtn {
-    position: fixed;
-    top: 12px;
-    right: 12px;
-    z-index: 20;
-    background: #8b5cf6;
-    color: #fff;
-    border: none;
-    padding: 9px 14px;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: 7px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.35);
-  }
-
-  #adminBtn:active { transform: scale(0.96); }
-
-  #adminModal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    z-index: 30;
-    background: rgba(0,0,0,0.72);
-    align-items: center;
-    justify-content: center;
-  }
-
-  #adminModal.show { display: flex; }
-
-  .admin-box {
-    width: min(340px, 90vw);
-    background: #181824;
-    border: 2px solid #8b5cf6;
-    border-radius: 12px;
-    padding: 22px;
-    text-align: center;
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.35);
-  }
-
-  .admin-box h2 {
-    margin: 0 0 12px;
-    color: #b794ff;
-    font-size: 22px;
-  }
-
-  #adminCode {
-    width: 100%;
-    padding: 11px;
-    margin: 8px 0 12px;
-    border: 1px solid #555;
-    border-radius: 7px;
-    background: #0d0e15;
-    color: #fff;
-    font-size: 16px;
-    text-align: center;
-    outline: none;
-  }
-
-  #adminMessage {
-    min-height: 20px;
-    margin-top: 10px;
-    font-size: 13px;
-  }
-
-  .admin-actions {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .admin-actions button {
-    border: none;
-    border-radius: 7px;
-    padding: 9px 14px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-
-  #adminLogin { background: #8b5cf6; color: #fff; }
-  #adminClose { background: #444; color: #fff; }
-
-  #adminStatus {
-    position: fixed;
-    top: 50px;
-    right: 12px;
-    z-index: 19;
-    display: none;
-    background: #00c878;
-    color: #001b10;
-    padding: 7px 11px;
-    border-radius: 7px;
-    font-size: 12px;
-    font-weight: bold;
-  }
-
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  background:#0d0e15;color:#fff;font-family:'Segoe UI',Roboto,Arial,sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+}
+h1{margin:4px 0 6px;font-size:24px;color:#00e5ff;text-shadow:0 0 10px #00e5ff99;letter-spacing:2px}
+#game-container{
+  position:relative;border:4px solid #00e5ff;border-radius:12px;
+  box-shadow:0 0 25px #00e5ff4d;overflow:hidden;flex:1;min-height:0;
+  width:min(480px,calc(100vw - 12px));display:flex;
+}
+body.is-fullscreen h1{display:none}
+body.is-fullscreen #game-container{
+  position:fixed;
+  left:0;
+  top:0;
+  width:100vw;
+  height:calc(100vh - 112px);
+  min-height:0;
+  border:0;
+  border-radius:0;
+  box-shadow:none;
+  z-index:1;
+}
+body.is-fullscreen .mobile-controls{
+  position:fixed;
+  left:0;
+  bottom:34px;
+  width:100vw;
+  height:66px;
+  margin:0;
+  padding:3px 0;
+  background:#0d0e15;
+  z-index:10;
+}
+body.is-fullscreen .controls-hint{
+  position:fixed;
+  left:0;
+  bottom:0;
+  width:100vw;
+  height:34px;
+  padding:3px 0;
+  background:#0d0e15;
+  z-index:10;
+}
+body.is-fullscreen #fullscreenBtn,
+body.is-fullscreen #adminBtn{z-index:20}
+canvas{display:block;background:#181824;width:100%;height:100%}
+.controls-hint{font-size:12px;color:#a0a3b5;text-align:center;line-height:1.25;padding:4px 0 6px;flex:none}
+.mobile-controls{display:flex;flex-direction:column;align-items:center;gap:5px;flex:none;padding:2px 0}
+.btn-row{display:flex;gap:9px}
+.btn{
+  background:#00e5ff;border:none;color:#000;padding:7px 19px;font-size:15px;font-weight:bold;
+  border-radius:6px;cursor:pointer;box-shadow:0 4px 8px #00e5ff4d;user-select:none;
+}
+.btn:active{transform:scale(.95);background:#00b3cc}
+.btn-speed{background:#ffaa00;box-shadow:0 4px 8px #ffaa004d}
+.top-btn{
+  position:fixed;top:10px;z-index:20;background:#333;color:#fff;border:1px solid #666;
+  padding:8px 12px;font-weight:bold;border-radius:7px;cursor:pointer
+}
+#adminBtn{right:10px;background:#8b5cf6;border-color:#8b5cf6}
+#fullscreenBtn{left:10px}
+#adminStatus{
+ position:fixed;top:49px;right:10px;z-index:19;display:none;background:#00c878;color:#001b10;
+ padding:6px 10px;border-radius:7px;font-size:12px;font-weight:bold
+}
+.modal{
+ display:none;position:fixed;inset:0;z-index:40;background:#000b;align-items:center;justify-content:center
+}
+.modal.show{display:flex}
+.box{
+ width:min(430px,92vw);max-height:90vh;overflow:auto;background:#181824;border:2px solid #00e5ff;
+ border-radius:14px;padding:22px;text-align:center;box-shadow:0 0 35px #00e5ff40
+}
+.box h2{margin:0 0 15px;color:#00e5ff}
+#adminModal .box{border-color:#8b5cf6}
+#adminCode{width:100%;padding:11px;margin:8px 0 12px;border:1px solid #555;border-radius:7px;background:#0d0e15;color:#fff;font-size:16px;text-align:center}
+.actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.actions button,.choice{
+ border:none;border-radius:7px;padding:9px 13px;font-weight:bold;cursor:pointer
+}
+.primary{background:#00e5ff;color:#000}.purple{background:#8b5cf6;color:#fff}.dark{background:#444;color:#fff}
+.table-grid,.colour-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:14px 0}
+.choice{background:#292b3c;color:#fff;border:1px solid #555}
+.choice.selected{background:#00e5ff;color:#000;border-color:#00e5ff}
+.colour-grid{grid-template-columns:repeat(5,1fr)}
+.colour{height:38px;padding:0;border:3px solid #555;border-radius:8px}
+.colour.selected{border-color:#fff;box-shadow:0 0 0 2px #00e5ff}
+.car-preview{height:95px;margin:8px auto;display:flex;align-items:center;justify-content:center}
+.preview-car{width:42px;height:78px;border-radius:10px;position:relative}
+.preview-car:after{content:"";position:absolute;left:8px;right:8px;top:16px;height:20px;background:#05d9e8;border-radius:3px}
+.small-note{color:#aaa;font-size:12px}
+@media(max-height:700px){
+ h1{font-size:19px;margin:2px 0}
+ .mobile-controls{gap:3px}.btn{padding:5px 16px;font-size:13px}
+ .controls-hint{font-size:10px;padding:2px 0 3px}
+}
+@media(max-width:600px){.top-btn{font-size:11px;padding:7px 9px}.box{padding:16px}}
 </style>
 </head>
 <body>
 
-  <button id="adminBtn">⚙️ ADMIN</button>
-  <div id="adminStatus">🛡️ ADMIN MODE</div>
+<button class="top-btn" id="fullscreenBtn">⛶ FULLSCREEN</button>
+<button class="top-btn" id="adminBtn">⚙️ ADMIN</button>
+<div id="adminStatus">🛡️ ADMIN MODE</div>
 
-  <div id="adminModal">
-    <div class="admin-box">
-      <h2>🛡️ Admin Mode</h2>
-      <div>Enter the admin code:</div>
-      <input id="adminCode" type="password" inputmode="numeric" maxlength="20" placeholder="Admin code">
-      <div class="admin-actions">
-        <button id="adminLogin">Enter</button>
-        <button id="adminClose">Cancel</button>
-      </div>
-      <div id="adminMessage"></div>
-    </div>
+<div id="settingsModal" class="modal">
+ <div class="box">
+  <h2>🏁 Game Setup</h2>
+  <div><b>Choose times tables</b></div>
+  <div class="table-grid" id="tableGrid"></div>
+  <div class="actions">
+   <button class="choice" id="allTables">🔀 ALL TABLES</button>
   </div>
-
-
-  <h1>HIGHWAY TIMES TABLES</h1>
-
-  <div id="game-container">
-    <canvas id="gameCanvas" width="480" height="620"></canvas>
+  <hr style="border-color:#333;margin:16px 0">
+  <div><b>🎨 Choose your car colour</b></div>
+  <div class="car-preview"><div class="preview-car" id="previewCar"></div></div>
+  <div class="colour-grid" id="colourGrid"></div>
+  <div class="actions">
+   <button class="primary" id="startSetup">🚗 START GAME</button>
+   <button class="dark" id="closeSetup">Cancel</button>
   </div>
+ </div>
+</div>
 
-  <div class="mobile-controls">
-    <div class="btn-row">
-      <button class="btn btn-speed" id="upBtn">▲</button>
-    </div>
-    <div class="btn-row">
-      <button class="btn" id="leftBtn">◀</button>
-      <button class="btn btn-speed" id="downBtn">▼</button>
-      <button class="btn" id="rightBtn">▶</button>
-    </div>
+<div id="adminModal" class="modal">
+ <div class="box">
+  <h2 style="color:#b794ff">🛡️ Admin Mode</h2>
+  <div>Enter the admin code:</div>
+  <input id="adminCode" type="password" inputmode="numeric" maxlength="20" placeholder="Admin code">
+  <div class="actions">
+   <button class="purple" id="adminLogin">Enter</button>
+   <button class="dark" id="adminClose">Cancel</button>
   </div>
+  <div id="adminMessage" style="min-height:20px;margin-top:10px;font-size:13px"></div>
+ </div>
+</div>
 
-  <div class="controls-hint">
-    Steer: <b>Left/Right Arrow Keys</b> or <b>A/D</b><br>
-    Speed: <b>Up/Down Arrow Keys</b> or <b>W/S</b><br>
-  </div>
+<h1>HIGHWAY TIMES TABLES</h1>
+<div id="game-container"><canvas id="gameCanvas"></canvas></div>
+
+<div class="mobile-controls">
+ <div class="btn-row"><button class="btn btn-speed" id="upBtn">▲</button></div>
+ <div class="btn-row">
+  <button class="btn" id="leftBtn">◀</button>
+  <button class="btn btn-speed" id="downBtn">▼</button>
+  <button class="btn" id="rightBtn">▶</button>
+ </div>
+</div>
+<div class="controls-hint">
+ Steer: <b>←/→</b> or <b>A/D</b> &nbsp; Speed: <b>↑/↓</b> or <b>W/S</b>
+</div>
 
 <script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
+const canvas=document.getElementById("gameCanvas"),ctx=canvas.getContext("2d");
+const container=document.getElementById("game-container");
 
-// -------------------------------------------------------------
-// Game Constants & Configuration (4 LANES)
-// -------------------------------------------------------------
-const LANES = [82.5, 187.5, 292.5, 397.5]; // 4 Lane Center Positions
-let currentLane = 1;
+let W=480,H=620,scale=1;
+let LANES=[82.5,187.5,292.5,397.5],currentLane=1,carX=LANES[1],carY=510;
+let baseSpeed=5,currentSpeed=5,minSpeed=3,maxSpeed=13;
+let score=0,lives=3,roadOffset=0,gameState='START',adminMode=false;
+let questionCooldown=0;
+const QUESTION_DELAY_FRAMES=180;
+let currentQuestion=null,optionsY=-120,hasCollidedAnswer=false;
+let trafficCars=[],nextTrafficTimer=0,particles=[];
+let selectedTables=[2,3,4,5,6,7,8,9,10,11,12],allTables=true;
+let carColour="#ff2a6d";
 
-let carX = LANES[currentLane];
-let carY = 510;
-
-let baseSpeed = 5;
-let currentSpeed = baseSpeed;
-let minSpeed = 3;
-let maxSpeed = 13;
-
-let score = 0;
-let lives = 3;
-let roadOffset = 0;
-let gameState = 'START'; // 'START', 'PLAYING', 'GAMEOVER'
-let adminMode = false;
-let questionCooldown = 0;
-const QUESTION_DELAY_FRAMES = 120; // ~2 seconds at 60 FPS
-
-// Inputs
-let keys = { up: false, down: false };
-
-// Dynamic Math & Obstacles
-let currentQuestion = null;
-let optionsY = -120;
-let hasCollidedAnswer = false;
-
-let trafficCars = [];
-let nextTrafficTimer = 0;
-
-// Particle FX
-let particles = [];
-
-// Audio Synthesizer
-const AudioContext = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-
-function initAudio() {
-  if (!audioCtx) audioCtx = new AudioContext();
+const AudioContext=window.AudioContext||window.webkitAudioContext;let audioCtx=null;
+function initAudio(){if(!audioCtx)audioCtx=new AudioContext()}
+function playTone(freq,type,duration){
+ if(!audioCtx)return;try{let o=audioCtx.createOscillator(),g=audioCtx.createGain();
+ o.type=type;o.frequency.value=freq;g.gain.value=.1;g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+ o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch(e){}
 }
+function playSound(t){initAudio();if(t==='steer')playTone(280,'triangle',.04);
+ if(t==='correct'){playTone(523,'sine',.1);setTimeout(()=>playTone(659,'sine',.2),80)}
+ if(t==='wrong'||t==='crash')playTone(120,'sawtooth',.35)}
 
-function playTone(freq, type, duration) {
-  if (!audioCtx) return;
-  try {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
-  } catch(e) {}
+function resizeCanvas(){
+ const r=container.getBoundingClientRect();
+ W=Math.max(300,r.width-8);H=Math.max(300,r.height-8);
+ canvas.width=Math.round(W*devicePixelRatio);canvas.height=Math.round(H*devicePixelRatio);
+ canvas.style.width=W+"px";canvas.style.height=H+"px";
+ ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+ scale=Math.min(W/480,H/620);
+ LANES=[W*.172,W*.391,W*.609,W*.828];
+ carY=H*.823;
+ carX=LANES[currentLane];
 }
+new ResizeObserver(resizeCanvas).observe(container);
+window.addEventListener("resize",resizeCanvas);
 
-function playSound(type) {
-  initAudio();
-  if (type === 'steer') playTone(280, 'triangle', 0.04);
-  if (type === 'correct') {
-    playTone(523, 'sine', 0.1);
-    setTimeout(() => playTone(659, 'sine', 0.2), 80);
+function generateQuestion(){
+ const n1=selectedTables[Math.floor(Math.random()*selectedTables.length)];
+ const n2=Math.floor(Math.random()*11)+2,correct=n1*n2;
+ let wrong=new Set();
+ while(wrong.size<3){
+  let fake=correct+(Math.floor(Math.random()*6)+1)*(Math.random()<.5?1:-1);
+  if(fake>0&&fake!==correct)wrong.add(fake);
+ }
+ let options=[correct,...wrong];options.sort(()=>Math.random()-.5);
+ currentQuestion={text:`${n1} × ${n2} = ?`,correctIndex:options.indexOf(correct),options};
+ optionsY=-70;hasCollidedAnswer=false;
+}
+function spawnTrafficCar(){
+ if(optionsY>-150&&optionsY<180)return;
+ let lane=Math.floor(Math.random()*4),colors=['#e63946','#f1faee','#ffb703','#8338ec','#06d6a0'];
+ trafficCars.push({lane,x:LANES[lane],y:-70,speed:Math.random()*1.5+1.5,color:colors[Math.floor(Math.random()*colors.length)]});
+}
+function moveLeft(){if(gameState==='PLAYING'&&currentLane>0){currentLane--;playSound('steer')}}
+function moveRight(){if(gameState==='PLAYING'&&currentLane<3){currentLane++;playSound('steer')}}
+function startGame(){
+ score=0;lives=3;baseSpeed=5;currentSpeed=5;currentLane=1;trafficCars=[];nextTrafficTimer=0;
+ questionCooldown=0;gameState='PLAYING';generateQuestion();
+}
+let keys={up:false,down:false};
+window.addEventListener('keydown',e=>{
+ if(e.key==='ArrowLeft'||e.key==='a'||e.key==='A')moveLeft();
+ if(e.key==='ArrowRight'||e.key==='d'||e.key==='D')moveRight();
+ if(e.key==='ArrowUp'||e.key==='w'||e.key==='W')keys.up=true;
+ if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')keys.down=true;
+ if((e.key===' '||e.key==='Enter')&&(gameState==='START'||gameState==='GAMEOVER'))openSetup();
+});
+window.addEventListener('keyup',e=>{
+ if(e.key==='ArrowUp'||e.key==='w'||e.key==='W')keys.up=false;
+ if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')keys.down=false;
+});
+leftBtn.onclick=moveLeft;rightBtn.onclick=moveRight;
+upBtn.onpointerdown=()=>keys.up=true;upBtn.onpointerup=()=>keys.up=false;upBtn.onpointerleave=()=>keys.up=false;
+downBtn.onpointerdown=()=>keys.down=true;downBtn.onpointerup=()=>keys.down=false;downBtn.onpointerleave=()=>keys.down=false;
+canvas.onclick=()=>{if(gameState==='START'||gameState==='GAMEOVER')openSetup()};
+
+function createParticles(x,y,color){for(let i=0;i<20;i++)particles.push({x,y,vx:(Math.random()-.5)*8,vy:(Math.random()-.5)*8,radius:Math.random()*4+2,color,life:1})}
+
+function update(){
+ carX+=(LANES[currentLane]-carX)*.25;
+ if(keys.up)currentSpeed=Math.min(maxSpeed,currentSpeed+.15);
+ else if(keys.down)currentSpeed=Math.max(minSpeed,currentSpeed-.2);
+ else {if(currentSpeed<baseSpeed)currentSpeed+=.05;if(currentSpeed>baseSpeed)currentSpeed-=.05}
+ roadOffset=(roadOffset+currentSpeed)%40;
+ if(gameState==='PLAYING'){
+  optionsY+=currentSpeed;
+  if(optionsY>=carY-25&&optionsY<=carY+35&&!hasCollidedAnswer){
+   hasCollidedAnswer=true;
+   if(currentLane===currentQuestion.correctIndex){
+    score+=100;baseSpeed=Math.min(9,baseSpeed+.2);playSound('correct');
+    createParticles(LANES[currentLane],optionsY,'#00ff88');
+   }else{
+    if(!adminMode)lives--;playSound('wrong');createParticles(LANES[currentLane],optionsY,'#ff3366');
+    if(lives<=0&&!adminMode)gameState='GAMEOVER';
+   }
   }
-  if (type === 'wrong' || type === 'crash') playTone(120, 'sawtooth', 0.35);
-}
-
-// -------------------------------------------------------------
-// Math Question Generator (4 Options)
-// -------------------------------------------------------------
-function generateQuestion() {
-  const n1 = Math.floor(Math.random() * 11) + 2; // 2 to 12
-  const n2 = Math.floor(Math.random() * 11) + 2; // 2 to 12
-  const correct = n1 * n2;
-
-  let wrongAnswers = new Set();
-  while (wrongAnswers.size < 3) {
-    let offset = (Math.floor(Math.random() * 6) + 1) * (Math.random() < 0.5 ? 1 : -1);
-    let fake = correct + offset;
-    if (fake > 0 && fake !== correct) wrongAnswers.add(fake);
+  if(optionsY>H+60&&questionCooldown===0)questionCooldown=QUESTION_DELAY_FRAMES;
+  if(questionCooldown>0){questionCooldown--;if(questionCooldown===0)generateQuestion()}
+  nextTrafficTimer++;
+  if(nextTrafficTimer>90/(currentSpeed/5)){spawnTrafficCar();nextTrafficTimer=0}
+  for(let i=trafficCars.length-1;i>=0;i--){
+   let t=trafficCars[i];t.y+=(currentSpeed-t.speed);
+   if(Math.abs(t.x-carX)<30*scale&&Math.abs(t.y-carY)<50*scale){
+    if(!adminMode)lives--;playSound('crash');createParticles(t.x,t.y,'#ffaa00');trafficCars.splice(i,1);
+    if(lives<=0&&!adminMode)gameState='GAMEOVER';continue;
+   }
+   if(t.y>H+100||t.y<-200)trafficCars.splice(i,1);
   }
-
-  let options = [correct, ...Array.from(wrongAnswers)];
-  options.sort(() => Math.random() - 0.5); // Shuffle 4 options
-
-  currentQuestion = {
-    text: `${n1} × ${n2} = ?`,
-    correctIndex: options.indexOf(correct),
-    options: options
-  };
-
-  optionsY = -100;
-  hasCollidedAnswer = false;
+ }
+ particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.life-=.04;if(p.life<=0)particles.splice(i,1)});
 }
 
-// -------------------------------------------------------------
-// Traffic Obstacle Generator
-// -------------------------------------------------------------
-function spawnTrafficCar() {
-  // Don't spawn traffic right over Math cards
-  if (optionsY > -150 && optionsY < 180) return;
-
-  // Pick random lane
-  const lane = Math.floor(Math.random() * 4);
-  const colors = ['#e63946', '#f1faee', '#ffb703', '#8338ec', '#06d6a0'];
-  const color = colors[Math.floor(Math.random() * colors.length)];
-
-  // Relative speed compared to road
-  const relativeSpeed = Math.random() * 1.5 + 1.5; 
-
-  trafficCars.push({
-    lane: lane,
-    x: LANES[lane],
-    y: -80,
-    speed: relativeSpeed,
-    color: color
-  });
+function drawCar(x,y,col,w=36,h=70){
+ ctx.save();ctx.translate(x,y);ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,8);ctx.fill();
+ ctx.fillStyle='#05d9e8';ctx.fillRect(-w*.33,-h*.21,w*.66,h*.21);
+ ctx.fillStyle='#ffff00';ctx.fillRect(-w*.42,-h*.5,w*.17,4);ctx.fillRect(w*.25,-h*.5,w*.17,4);ctx.restore();
+}
+function draw(){
+ ctx.fillStyle='#1b3b1e';ctx.fillRect(0,0,W,H);
+ let roadX=W*.0625,roadW=W*.875;
+ ctx.fillStyle='#222533';ctx.fillRect(roadX,0,roadW,H);
+ ctx.fillStyle='#ffcc00';ctx.fillRect(roadX-4,0,4,H);ctx.fillRect(roadX+roadW,0,4,H);
+ ctx.strokeStyle='#ffffff80';ctx.lineWidth=4;ctx.setLineDash([20,20]);ctx.lineDashOffset=-roadOffset;
+ for(let i=1;i<4;i++){let x=roadX+roadW*i/4;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}ctx.setLineDash([]);
+ trafficCars.forEach(t=>{ctx.save();ctx.translate(t.x,t.y);drawCar(0,0,t.color,32,60);ctx.restore()});
+ if(gameState==='PLAYING'&&currentQuestion){
+  for(let i=0;i<4;i++){let bx=LANES[i]-35,by=optionsY;ctx.fillStyle='#2a2d42';ctx.strokeStyle='#00e5ff';ctx.lineWidth=2;
+   ctx.beginPath();ctx.roundRect(bx,by,70,42,6);ctx.fill();ctx.stroke();ctx.fillStyle='#fff';ctx.font='bold 20px Arial';ctx.textAlign='center';ctx.fillText(currentQuestion.options[i],LANES[i],by+28)}
+ }
+ drawCar(carX,carY,carColour,36,70);
+ particles.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);ctx.fillStyle=p.color;ctx.globalAlpha=Math.max(0,p.life);ctx.fill();ctx.globalAlpha=1});
+ ctx.fillStyle='#0f101af0';ctx.fillRect(0,0,W,70);ctx.fillStyle='#00e5ff';ctx.fillRect(0,68,W,2);
+ if(gameState==='PLAYING'&&currentQuestion){
+  ctx.fillStyle='#fff';ctx.font='bold 22px Arial';ctx.textAlign='center';ctx.fillText(currentQuestion.text,W/2,42);
+  ctx.font='13px Arial';ctx.textAlign='left';ctx.fillStyle='#ffcc00';ctx.fillText(`SCORE: ${score}`,15,22);
+  ctx.fillStyle=keys.up?'#00ff88':keys.down?'#ff3366':'#00e5ff';ctx.fillText(`SPEED: ${Math.round(currentSpeed*12)} MPH`,15,45);
+  ctx.textAlign='right';ctx.fillStyle=adminMode?'#00ff88':'#ff2a6d';ctx.fillText(adminMode?'LIVES: ♾️ UNLIMITED':`LIVES: ${"❤️".repeat(lives)}`,W-15,25);
+ }
+ if(gameState==='START'||gameState==='GAMEOVER'){
+  ctx.fillStyle='#0d0e15e6';ctx.fillRect(0,0,W,H);ctx.textAlign='center';
+  ctx.fillStyle=gameState==='START'?'#00e5ff':'#ff2a6d';ctx.font='bold 32px Arial';
+  ctx.fillText(gameState==='START'?'Are you ready?':'GAME OVER',W/2,H*.38);
+  if(gameState==='GAMEOVER'){ctx.fillStyle='#fff';ctx.font='20px Arial';ctx.fillText(`Final Score: ${score}`,W/2,H*.46)}
+  ctx.fillStyle='#aaa';ctx.font='15px Arial';
+  if(gameState==='START'){ctx.fillText('• Choose your times tables',W/2,H*.44);ctx.fillText('• Steer into the correct answer',W/2,H*.48);ctx.fillText('• Avoid crashing into cars',W/2,H*.52)}
+  ctx.fillStyle='#ffcc00';ctx.font='bold 18px Arial';ctx.fillText('SPACE / CLICK TO START',W/2,H*.63);
+ }
 }
 
-// -------------------------------------------------------------
-// Controls Handling
-// -------------------------------------------------------------
-function moveLeft() {
-  if (gameState === 'PLAYING' && currentLane > 0) {
-    currentLane--;
-    playSound('steer');
-  }
-}
+function gameLoop(){update();draw();requestAnimationFrame(gameLoop)}
+resizeCanvas();gameLoop();
 
-function moveRight() {
-  if (gameState === 'PLAYING' && currentLane < 3) {
-    currentLane++;
-    playSound('steer');
-  }
-}
+const settingsModal=document.getElementById('settingsModal'),tableGrid=document.getElementById('tableGrid');
+for(let n=2;n<=12;n++){let b=document.createElement('button');b.className='choice selected';b.textContent=n;b.onclick=()=>{
+ let idx=selectedTables.indexOf(n);if(idx>=0){if(selectedTables.length>1)selectedTables.splice(idx,1)}else selectedTables.push(n);
+ allTables=selectedTables.length===11;b.classList.toggle('selected',selectedTables.includes(n));updateAllButton()};
+ tableGrid.appendChild(b)}
+const allTablesBtn=document.getElementById('allTables');
+function updateAllButton(){allTablesBtn.classList.toggle('selected',allTables)}
+allTablesBtn.onclick=()=>{allTables=!allTables;selectedTables=allTables?[2,3,4,5,6,7,8,9,10,11,12]:[2];[...tableGrid.children].forEach((b,i)=>b.classList.toggle('selected',allTables||selectedTables.includes(i+2)))};
+function openSetup(){settingsModal.classList.add('show')}
+document.getElementById('closeSetup').onclick=()=>settingsModal.classList.remove('show');
+document.getElementById('startSetup').onclick=()=>{settingsModal.classList.remove('show');startGame()};
 
-function startGame() {
-  score = 0;
-  lives = 3;
-  baseSpeed = 5;
-  currentSpeed = baseSpeed;
-  currentLane = 1;
-  carX = LANES[currentLane];
-  trafficCars = [];
-  gameState = 'PLAYING';
-  generateQuestion();
-}
+const colours=['#ff2a6d','#00e5ff','#00e676','#ffaa00','#8b5cf6','#ffffff','#ff3333','#2979ff','#ff69b4','#777'];
+const colourGrid=document.getElementById('colourGrid'),preview=document.getElementById('previewCar');
+colours.forEach((c,i)=>{let b=document.createElement('button');b.className='colour';b.style.background=c;if(i===0)b.classList.add('selected');b.onclick=()=>{carColour=c;preview.style.background=c;[...colourGrid.children].forEach(x=>x.classList.remove('selected'));b.classList.add('selected')};colourGrid.appendChild(b)});
+preview.style.background=carColour;
 
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') moveLeft();
-  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') moveRight();
-  
-  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = true;
-  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = true;
-
-  if (e.key === ' ' || e.key === 'Enter') {
-    if (gameState === 'START' || gameState === 'GAMEOVER') startGame();
-  }
+document.getElementById('fullscreenBtn').onclick=async()=>{
+ try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){}
+};
+document.addEventListener('fullscreenchange',()=>{
+ const fs=!!document.fullscreenElement;
+ document.body.classList.toggle('is-fullscreen',fs);
+ document.getElementById('fullscreenBtn').textContent=fs?'⛶ EXIT FULLSCREEN':'⛶ FULLSCREEN';
+ setTimeout(resizeCanvas,50);
 });
 
-window.addEventListener('keyup', (e) => {
-  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.up = false;
-  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.down = false;
-});
-
-// Mobile Buttons
-document.getElementById('leftBtn').addEventListener('click', moveLeft);
-document.getElementById('rightBtn').addEventListener('click', moveRight);
-
-const upBtn = document.getElementById('upBtn');
-const downBtn = document.getElementById('downBtn');
-
-upBtn.addEventListener('mousedown', () => keys.up = true);
-upBtn.addEventListener('mouseup', () => keys.up = false);
-upBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys.up = true; });
-upBtn.addEventListener('touchend', () => keys.up = false);
-
-downBtn.addEventListener('mousedown', () => keys.down = true);
-downBtn.addEventListener('mouseup', () => keys.down = false);
-downBtn.addEventListener('touchstart', (e) => { e.preventDefault(); keys.down = true; });
-downBtn.addEventListener('touchend', () => keys.down = false);
-
-canvas.addEventListener('click', () => {
-  if (gameState === 'START' || gameState === 'GAMEOVER') startGame();
-});
-
-// Particle Generator
-function createParticles(x, y, color) {
-  for (let i = 0; i < 20; i++) {
-    particles.push({
-      x: x,
-      y: y,
-      vx: (Math.random() - 0.5) * 8,
-      vy: (Math.random() - 0.5) * 8,
-      radius: Math.random() * 4 + 2,
-      color: color,
-      life: 1
-    });
-  }
-}
-
-// -------------------------------------------------------------
-// Update Loop
-// -------------------------------------------------------------
-function update() {
-  // Smooth Steering
-  carX += (LANES[currentLane] - carX) * 0.25;
-
-  // Handle Acceleration / Braking
-  if (keys.up) {
-    currentSpeed = Math.min(maxSpeed, currentSpeed + 0.15);
-  } else if (keys.down) {
-    currentSpeed = Math.max(minSpeed, currentSpeed - 0.2);
-  } else {
-    // Return smoothly to base speed
-    if (currentSpeed < baseSpeed) currentSpeed += 0.05;
-    if (currentSpeed > baseSpeed) currentSpeed -= 0.05;
-  }
-
-  // Scroll Road
-  roadOffset = (roadOffset + currentSpeed) % 40;
-
-  if (gameState === 'PLAYING') {
-    // Move Answer Wave
-    optionsY += currentSpeed;
-
-    // 1. Check Answer Collision
-    if (optionsY >= carY - 25 && optionsY <= carY + 35 && !hasCollidedAnswer) {
-      hasCollidedAnswer = true;
-      if (currentLane === currentQuestion.correctIndex) {
-        score += 100;
-        baseSpeed = Math.min(9, baseSpeed + 0.2); // Gradually speed up game
-        playSound('correct');
-        createParticles(LANES[currentLane], optionsY, '#00ff88');
-      } else {
-        if (!adminMode) if (!adminMode) lives--;
-        playSound('wrong');
-        createParticles(LANES[currentLane], optionsY, '#ff3366');
-        if (lives <= 0 && !adminMode) gameState = 'GAMEOVER';
-      }
-    }
-
-    // Spawn the next question after a short pause, giving the player more time
-    // between questions instead of immediately starting another wave.
-    if (optionsY > canvas.height + 60 && questionCooldown === 0) {
-      questionCooldown = QUESTION_DELAY_FRAMES;
-    }
-
-    if (questionCooldown > 0) {
-      questionCooldown--;
-      if (questionCooldown === 0) generateQuestion();
-    }
-
-    // 2. Traffic Spawning & Movement
-    nextTrafficTimer++;
-    if (nextTrafficTimer > 90 / (currentSpeed / 5)) {
-      spawnTrafficCar();
-      nextTrafficTimer = 0;
-    }
-
-    for (let i = trafficCars.length - 1; i >= 0; i--) {
-      let traffic = trafficCars[i];
-      // Traffic moves based on player speed vs traffic speed
-      traffic.y += (currentSpeed - traffic.speed);
-
-      // Collision with Traffic Car
-      if (
-        Math.abs(traffic.x - carX) < 30 &&
-        Math.abs(traffic.y - carY) < 50
-      ) {
-        if (!adminMode) if (!adminMode) lives--;
-        playSound('crash');
-        createParticles(traffic.x, traffic.y, '#ffaa00');
-        trafficCars.splice(i, 1); // Remove crashed car
-        if (lives <= 0 && !adminMode) gameState = 'GAMEOVER';
-        continue;
-      }
-
-      // Remove off-screen traffic
-      if (traffic.y > canvas.height + 100 || traffic.y < -200) {
-        trafficCars.splice(i, 1);
-      }
-    }
-  }
-
-  // Particles update
-  particles.forEach((p, index) => {
-    p.x += p.vx;
-    p.y += p.vy;
-    p.life -= 0.04;
-    if (p.life <= 0) particles.splice(index, 1);
-  });
-}
-
-// -------------------------------------------------------------
-// Render Graphics
-// -------------------------------------------------------------
-function draw() {
-  // 1. Side Grass
-  ctx.fillStyle = '#1b3b1e';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // 2. Road Asphalt (Width: 420px, X: 30 to 450)
-  ctx.fillStyle = '#222533';
-  ctx.fillRect(30, 0, 420, canvas.height);
-
-  // Yellow Borders
-  ctx.fillStyle = '#ffcc00';
-  ctx.fillRect(26, 0, 4, canvas.height);
-  ctx.fillRect(450, 0, 4, canvas.height);
-
-  // White Lane Dividers (3 dashed lines for 4 lanes)
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-  ctx.lineWidth = 4;
-  ctx.setLineDash([20, 20]);
-  ctx.lineDashOffset = -roadOffset;
-
-  ctx.beginPath();
-  ctx.moveTo(135, 0); ctx.lineTo(135, canvas.height);
-  ctx.moveTo(240, 0); ctx.lineTo(240, canvas.height);
-  ctx.moveTo(345, 0); ctx.lineTo(345, canvas.height);
-  ctx.stroke();
-  ctx.setLineDash([]); // Reset dash
-
-  // 3. Draw Traffic Cars (Obstacles)
-  trafficCars.forEach(tc => {
-    ctx.save();
-    ctx.translate(tc.x, tc.y);
-    ctx.fillStyle = tc.color;
-    ctx.beginPath();
-    ctx.roundRect(-16, -30, 32, 60, 6);
-    ctx.fill();
-
-    // Windshield
-    ctx.fillStyle = '#111';
-    ctx.fillRect(-10, -10, 20, 12);
-
-    // Rear Lights
-    ctx.fillStyle = '#ff0000';
-    ctx.fillRect(-13, 26, 5, 3);
-    ctx.fillRect(8, 26, 5, 3);
-    ctx.restore();
-  });
-
-  // 4. Draw Answer Cards (Math Wave)
-  if (gameState === 'PLAYING' && currentQuestion) {
-    for (let i = 0; i < 4; i++) {
-      const boxX = LANES[i] - 35;
-      const boxY = optionsY;
-
-      ctx.fillStyle = '#2a2d42';
-      ctx.strokeStyle = '#00e5ff';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(boxX, boxY, 70, 42, 6);
-      ctx.fill();
-      ctx.stroke();
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 20px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(currentQuestion.options[i], LANES[i], boxY + 28);
-    }
-  }
-
-  // 5. Draw Player Car
-  ctx.save();
-  ctx.translate(carX, carY);
-
-  // Red Sports Car
-  ctx.fillStyle = '#ff2a6d';
-  ctx.beginPath();
-  ctx.roundRect(-18, -35, 36, 70, 8);
-  ctx.fill();
-
-  // Windshield
-  ctx.fillStyle = '#05d9e8';
-  ctx.fillRect(-12, -15, 24, 15);
-
-  // Headlights
-  ctx.fillStyle = '#ffff00';
-  ctx.fillRect(-15, -35, 6, 4);
-  ctx.fillRect(9, -35, 6, 4);
-
-  // Exhaust Flame if Accelerating
-  if (keys.up) {
-    ctx.fillStyle = '#ff6600';
-    ctx.beginPath();
-    ctx.moveTo(-8, 35);
-    ctx.lineTo(0, 35 + Math.random() * 15 + 5);
-    ctx.lineTo(8, 35);
-    ctx.fill();
-  }
-
-  ctx.restore();
-
-  // 6. Draw Particles
-  particles.forEach(p => {
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = p.color;
-    ctx.globalAlpha = Math.max(0, p.life);
-    ctx.fill();
-    ctx.globalAlpha = 1.0;
-  });
-
-  // 7. HUD Bar
-  ctx.fillStyle = 'rgba(15, 16, 26, 0.92)';
-  ctx.fillRect(0, 0, canvas.width, 70);
-  ctx.fillStyle = '#00e5ff';
-  ctx.fillRect(0, 68, canvas.width, 2);
-
-  if (gameState === 'PLAYING' && currentQuestion) {
-    // Current Question
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold 22px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(currentQuestion.text, canvas.width / 2, 42);
-
-    // Score
-    ctx.font = '13px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillStyle = '#ffcc00';
-    ctx.fillText(`SCORE: ${score}`, 15, 22);
-
-    // Speedometer
-    let mph = Math.round(currentSpeed * 12);
-    ctx.fillStyle = keys.up ? '#00ff88' : (keys.down ? '#ff3366' : '#00e5ff');
-    ctx.fillText(`SPEED: ${mph} MPH`, 15, 45);
-
-    // Lives
-    ctx.textAlign = 'right';
-    ctx.fillStyle = adminMode ? '#00ff88' : '#ff2a6d';
-    ctx.fillText(adminMode ? 'LIVES: ♾️ UNLIMITED' : `LIVES: ${"❤️".repeat(lives)}`, canvas.width - 15, 25);
-  }
-
-  // 8. Overlays
-  if (gameState === 'START') {
-    ctx.fillStyle = 'rgba(13, 14, 21, 0.88)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = '#00e5ff';
-    ctx.font = 'bold 28px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText("Are you ready?", canvas.width / 2, 230);
-
-    ctx.fillStyle = '#aaa';
-    ctx.font = '15px Arial';
-    ctx.fillText("• Steer into correct math answers", canvas.width / 2, 270);
-    ctx.fillText("• Avoid crashing into cars", canvas.width / 2, 295);
-    ctx.fillText("• Try to get a high score!", canvas.width / 2, 320);
-
-    ctx.fillStyle = '#ffcc00';
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText("Space/Click to Start", canvas.width / 2, 390);
-  } else if (gameState === 'GAMEOVER') {
-    ctx.fillStyle = 'rgba(13, 14, 21, 0.92)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = '#ff2a6d';
-    ctx.font = 'bold 32px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText("GAME OVER", canvas.width / 2, 230);
-
-    ctx.fillStyle = '#fff';
-    ctx.font = '20px Arial';
-    ctx.fillText(`Final Score: ${score}`, canvas.width / 2, 280);
-
-    ctx.fillStyle = '#00e5ff';
-    ctx.font = 'bold 18px Arial';
-    ctx.fillText("Press SPACE or TAP to Try Again", canvas.width / 2, 350);
-  }
-}
-
-// -------------------------------------------------------------
-// Main Loop
-// -------------------------------------------------------------
-
-// -------------------------------------------------------------
-// ADMIN MODE
-// -------------------------------------------------------------
-const ADMIN_CODE = "2468";
-
-const adminBtn = document.getElementById("adminBtn");
-const adminModal = document.getElementById("adminModal");
-const adminCodeInput = document.getElementById("adminCode");
-const adminLogin = document.getElementById("adminLogin");
-const adminClose = document.getElementById("adminClose");
-const adminMessage = document.getElementById("adminMessage");
-const adminStatus = document.getElementById("adminStatus");
-
-adminBtn.addEventListener("click", function () {
-  adminModal.classList.add("show");
-  adminCodeInput.value = "";
-  adminMessage.textContent = "";
-  adminCodeInput.focus();
-});
-
-adminClose.addEventListener("click", function () {
-  adminModal.classList.remove("show");
-});
-
-adminLogin.addEventListener("click", function () {
-  if (adminCodeInput.value === ADMIN_CODE) {
-    adminMode = true;
-    lives = 999999;
-
-    adminStatus.style.display = "block";
-    adminMessage.textContent = "✅ Admin mode enabled! Unlimited lives.";
-    adminMessage.style.color = "#00ff88";
-
-    setTimeout(function () {
-      adminModal.classList.remove("show");
-    }, 700);
-  } else {
-    adminMessage.textContent = "❌ Incorrect admin code.";
-    adminMessage.style.color = "#ff3366";
-  }
-});
-
-adminCodeInput.addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    adminLogin.click();
-  }
-  if (e.key === "Escape") {
-    adminModal.classList.remove("show");
-  }
-});
-
-adminModal.addEventListener("click", function (e) {
-  if (e.target === adminModal) {
-    adminModal.classList.remove("show");
-  }
-});
-
-function gameLoop() {
-  update();
-  draw();
-  requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
+const ADMIN_CODE="2468",adminModal=document.getElementById('adminModal'),adminInput=document.getElementById('adminCode');
+document.getElementById('adminBtn').onclick=()=>{adminModal.classList.add('show');adminInput.value='';document.getElementById('adminMessage').textContent='';adminInput.focus()};
+document.getElementById('adminClose').onclick=()=>adminModal.classList.remove('show');
+document.getElementById('adminLogin').onclick=()=>{
+ let msg=document.getElementById('adminMessage');
+ if(adminInput.value===ADMIN_CODE){adminMode=true;lives=999999;document.getElementById('adminStatus').style.display='block';msg.textContent='✅ Admin mode enabled! Unlimited lives.';msg.style.color='#00ff88';setTimeout(()=>adminModal.classList.remove('show'),700)}
+ else{msg.textContent='❌ Incorrect admin code.';msg.style.color='#ff3366'}
+};
+adminInput.onkeydown=e=>{if(e.key==='Enter')document.getElementById('adminLogin').click();if(e.key==='Escape')adminModal.classList.remove('show')};
+adminModal.onclick=e=>{if(e.target===adminModal)adminModal.classList.remove('show')};
+settingsModal.onclick=e=>{if(e.target===settingsModal)settingsModal.classList.remove('show')};
 </script>
 </body>
 </html>
