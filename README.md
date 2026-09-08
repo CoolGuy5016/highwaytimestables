@@ -1,3 +1,5 @@
 <b>HIGHWAY TIMES TABLES</b>
 
-OPEN: coolguy5016.github.io/highwaytimestables/
+<a href="https://coolguy5016.github.io/highwaytimestables/">CLICK TO OPEN</a>
+
+Updates are <b>frequent!</b>
