@@ -23,5 +23,4 @@ Added <b>Game Setup Options</b>
 
 <b>Times Tables Select</b> in <b>Game Setup Options</b>
 
----
 All code was made in html using index.html files
