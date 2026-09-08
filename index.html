@@ -96,9 +96,10 @@ canvas{display:block;background:#181824;width:100%;height:100%}
 .colour{height:38px;padding:0;border:3px solid #555;border-radius:8px}
 .colour.selected{border-color:#fff;box-shadow:0 0 0 2px #00e5ff}
 .car-preview{height:95px;margin:8px auto;display:flex;align-items:center;justify-content:center}
-.preview-car{width:42px;height:78px;border-radius:10px;position:relative}
-.preview-car:after{content:"";position:absolute;left:8px;right:8px;top:16px;height:20px;background:#05d9e8;border-radius:3px}
+.preview-car{width:72px;height:105px;position:relative;display:flex;align-items:center;justify-content:center}
 .small-note{color:#aaa;font-size:12px}
+.selection-hint{color:#aaa;font-size:12px;font-weight:normal;margin-top:4px}
+.style-preview{position:relative;width:42px;height:78px;margin:auto}
 @media(max-height:700px){
  h1{font-size:19px;margin:2px 0}
  .mobile-controls{gap:3px}.btn{padding:5px 16px;font-size:13px}
@@ -116,7 +117,7 @@ canvas{display:block;background:#181824;width:100%;height:100%}
 <div id="settingsModal" class="modal">
  <div class="box">
   <h2>🏁 Game Setup</h2>
-  <div><b>Choose times tables</b></div>
+  <div><b>Choose times tables</b><div class="selection-hint">Blue = Selected</div></div>
   <div class="table-grid" id="tableGrid"></div>
   <div class="actions">
    <button class="choice" id="allTables">🔀 ALL TABLES</button>
@@ -125,6 +126,8 @@ canvas{display:block;background:#181824;width:100%;height:100%}
   <div><b>🎨 Choose your car colour</b></div>
   <div class="car-preview"><div class="preview-car" id="previewCar"></div></div>
   <div class="colour-grid" id="colourGrid"></div>
+  <div style="margin-top:14px"><b>🚗 Choose your car style</b></div>
+  <div class="table-grid" id="styleGrid"></div>
   <div class="actions">
    <button class="primary" id="startSetup">🚗 START GAME</button>
    <button class="dark" id="closeSetup">Cancel</button>
@@ -173,7 +176,7 @@ const QUESTION_DELAY_FRAMES=180;
 let currentQuestion=null,optionsY=-120,hasCollidedAnswer=false;
 let trafficCars=[],nextTrafficTimer=0,particles=[];
 let selectedTables=[2,3,4,5,6,7,8,9,10,11,12],allTables=true;
-let carColour="#ff2a6d";
+let carColour="#ff2a6d", carStyle="sports";
 
 const AudioContext=window.AudioContext||window.webkitAudioContext;let audioCtx=null;
 function initAudio(){if(!audioCtx)audioCtx=new AudioContext()}
@@ -277,9 +280,33 @@ function update(){
 }
 
 function drawCar(x,y,col,w=36,h=70){
- ctx.save();ctx.translate(x,y);ctx.fillStyle=col;ctx.beginPath();ctx.roundRect(-w/2,-h/2,w,h,8);ctx.fill();
- ctx.fillStyle='#05d9e8';ctx.fillRect(-w*.33,-h*.21,w*.66,h*.21);
- ctx.fillStyle='#ffff00';ctx.fillRect(-w*.42,-h*.5,w*.17,4);ctx.fillRect(w*.25,-h*.5,w*.17,4);ctx.restore();
+ ctx.save();ctx.translate(x,y);
+ // wheels
+ ctx.fillStyle='#111';
+ [[-.57,-.28],[.41,-.28],[-.57,.08],[.41,.08]].forEach(([px,py])=>ctx.fillRect(w*px,h*py,w*.16,h*.22));
+ // body
+ ctx.fillStyle=col;ctx.strokeStyle='rgba(255,255,255,.18)';ctx.lineWidth=1.5;ctx.beginPath();
+ if(carStyle==='sports')ctx.roundRect(-w*.46,-h*.50,w*.92,h,7);
+ else if(carStyle==='hatchback'){ctx.moveTo(-w*.45,-h*.50);ctx.lineTo(w*.45,-h*.50);ctx.lineTo(w*.48,-h*.18);ctx.lineTo(w*.46,h*.48);ctx.lineTo(-w*.46,h*.48);ctx.lineTo(-w*.48,-h*.18);ctx.closePath();}
+ else if(carStyle==='truck')ctx.roundRect(-w*.48,-h*.50,w*.96,h,3);
+ else if(carStyle==='formula'){ctx.moveTo(-w*.34,-h*.50);ctx.lineTo(w*.34,-h*.50);ctx.lineTo(w*.45,-h*.10);ctx.lineTo(w*.30,h*.48);ctx.lineTo(-w*.30,h*.48);ctx.lineTo(-w*.45,-h*.10);ctx.closePath();}
+ else ctx.roundRect(-w*.46,-h*.50,w*.92,h,5);
+ ctx.fill();ctx.stroke();
+ // glass
+ ctx.fillStyle='#172b38';ctx.beginPath();
+ if(carStyle==='truck')ctx.roundRect(-w*.34,-h*.39,w*.68,h*.23,3);
+ else if(carStyle==='formula')ctx.roundRect(-w*.27,-h*.32,w*.54,h*.24,5);
+ else ctx.roundRect(-w*.34,-h*.38,w*.68,h*.25,5);ctx.fill();
+ // glass reflection
+ ctx.fillStyle='rgba(140,235,255,.38)';ctx.fillRect(-w*.25,-h*.34,w*.50,h*.045);
+ // lights
+ ctx.fillStyle='#fff4a3';ctx.fillRect(-w*.34,-h*.48,w*.16,3);ctx.fillRect(w*.18,-h*.48,w*.16,3);
+ ctx.fillStyle='#ff3344';ctx.fillRect(-w*.34,h*.43,w*.14,3);ctx.fillRect(w*.20,h*.43,w*.14,3);
+ if(carStyle==='sports'){ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(-w*.055,-h*.45,w*.11,h*.90);}
+ if(carStyle==='rally'){ctx.fillStyle='#fff';ctx.fillRect(-w*.05,-h*.48,w*.10,h*.96);ctx.fillStyle='rgba(0,0,0,.30)';ctx.fillRect(-w*.36,h*.12,w*.72,h*.055);}
+ if(carStyle==='truck'){ctx.fillStyle='rgba(255,255,255,.14)';ctx.fillRect(-w*.40,h*.02,w*.80,h*.05);}
+ if(carStyle==='formula'){ctx.fillStyle='#111';ctx.fillRect(-w*.58,-h*.24,w*.17,h*.17);ctx.fillRect(w*.41,-h*.24,w*.17,h*.17);}
+ ctx.restore();
 }
 function draw(){
  ctx.fillStyle='#1b3b1e';ctx.fillRect(0,0,W,H);
@@ -329,9 +356,50 @@ document.getElementById('closeSetup').onclick=()=>settingsModal.classList.remove
 document.getElementById('startSetup').onclick=()=>{settingsModal.classList.remove('show');startGame()};
 
 const colours=['#ff2a6d','#00e5ff','#00e676','#ffaa00','#8b5cf6','#ffffff','#ff3333','#2979ff','#ff69b4','#777'];
+
+function updateCarPreview(){
+  preview.innerHTML='';preview.className='preview-car';
+  const car=document.createElement('div');car.style.cssText=`position:absolute;left:15px;top:13px;width:42px;height:78px;background:${carColour};box-sizing:border-box;border:1.5px solid rgba(255,255,255,.18);box-shadow:0 5px 8px rgba(0,0,0,.35);`;
+  if(carStyle==='sports')car.style.borderRadius='10px';
+  else if(carStyle==='hatchback'){car.style.borderRadius='6px';car.style.height='76px';}
+  else if(carStyle==='truck'){car.style.borderRadius='3px';car.style.height='82px';car.style.top='10px';}
+  else if(carStyle==='formula')car.style.clipPath='polygon(20% 0%,80% 0%,92% 38%,72% 100%,28% 100%,8% 38%)';
+  else {car.style.borderRadius='6px';car.style.height='76px';}
+  const glass=document.createElement('div');glass.style.cssText='position:absolute;left:7px;top:15px;width:26px;height:20px;background:#172b38;border-radius:5px;';car.appendChild(glass);
+  const shine=document.createElement('div');shine.style.cssText='position:absolute;left:10px;top:18px;width:20px;height:4px;background:rgba(140,235,255,.38);';car.appendChild(shine);
+  const lights=[['7px','2px','#fff4a3'],['29px','2px','#fff4a3'],['7px','72px','#ff3344'],['29px','72px','#ff3344']];
+  lights.forEach(([l,t,c])=>{const q=document.createElement('div');q.style.cssText=`position:absolute;left:${l};top:${t};width:6px;height:3px;background:${c};`;car.appendChild(q);});
+  if(carStyle==='sports'){const q=document.createElement('div');q.style.cssText='position:absolute;left:18px;top:0;width:5px;height:78px;background:rgba(255,255,255,.25);';car.appendChild(q);}
+  if(carStyle==='rally'){const q=document.createElement('div');q.style.cssText='position:absolute;left:19px;top:0;width:4px;height:76px;background:#fff;';car.appendChild(q);}
+  if(carStyle==='formula')[-7,40].forEach(l=>{const q=document.createElement('div');q.style.cssText=`position:absolute;left:${l}px;top:30px;width:9px;height:18px;background:#111;border-radius:2px;`;car.appendChild(q);});
+  preview.appendChild(car);
+}
+
 const colourGrid=document.getElementById('colourGrid'),preview=document.getElementById('previewCar');
-colours.forEach((c,i)=>{let b=document.createElement('button');b.className='colour';b.style.background=c;if(i===0)b.classList.add('selected');b.onclick=()=>{carColour=c;preview.style.background=c;[...colourGrid.children].forEach(x=>x.classList.remove('selected'));b.classList.add('selected')};colourGrid.appendChild(b)});
-preview.style.background=carColour;
+colours.forEach((c,i)=>{let b=document.createElement('button');b.className='colour';b.style.background=c;if(i===0)b.classList.add('selected');b.onclick=()=>{carColour=c;updateCarPreview();[...colourGrid.children].forEach(x=>x.classList.remove('selected'));b.classList.add('selected')};colourGrid.appendChild(b)});
+updateCarPreview();
+
+
+const styleGrid=document.getElementById('styleGrid');
+const styles=[
+  ["sports","🏎️ Sports"],
+  ["hatchback","🚗 Hatchback"],
+  ["truck","🛻 Truck"],
+  ["formula","🏁 Formula"],
+  ["rally","🚘 Rally"]
+];
+styles.forEach(([id,label],i)=>{
+  let b=document.createElement('button');
+  b.className='choice'+(i===0?' selected':'');
+  b.textContent=label;
+  b.onclick=()=>{
+    carStyle=id;
+    [...styleGrid.children].forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+    updateCarPreview();
+  };
+  styleGrid.appendChild(b);
+});
 
 document.getElementById('fullscreenBtn').onclick=async()=>{
  try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){}
