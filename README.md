@@ -4,7 +4,7 @@
 
 Updates are <b>frequent!</b>
 
-<h2>V1.1</h2>
+<h2>V1.1 - Game Setup Update</h2>
 
 
 <img width="183" height="33" alt="Screenshot 2026-09-08 203123" src="https://github.com/user-attachments/assets/33207c5f-4508-4896-af3c-e669df0ba2bd" />
